@@ -11,9 +11,7 @@ from typing import Any, List
 
 import weave
 import instructor
-from instructor import from_openai
 
-from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 from tree_sitter_languages import get_language, get_parser
 
@@ -21,6 +19,7 @@ from tree_sitter_languages import get_language, get_parser
 # STRONG_LLM = "gpt-4o"
 EMBEDDING_MODEL = "text-embedding-3-small"
 
+# from instructor import from_openai
 # oai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # async_client = from_openai(oai_client)
 
@@ -182,6 +181,8 @@ async def format_response(text: str, model: Any) -> Any:
         ],
         response_model=model,
         max_retries=5,
+        max_tokens=1024,
+        base_url="http://195.242.24.252:8000/v1",
     )
     return formatted_response
 

@@ -15,6 +15,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+MAX_TOKENS = 1024
 
 SOLVER_INSTRUCTIONS = """You are a world-class competitive programmer tasked with solving a programming problem. 
 You will be provided with a problem statement, and you need to create a Python3 solution for it. 
@@ -85,6 +86,8 @@ Let's think step by step to solve the problem:
         ],
         response_model=None,
         temperature=temperature,
+        max_tokens=MAX_TOKENS,
+        base_url="http://195.242.24.252:8000/v1",
     )
     formatted_response = await format_response(
         response.choices[0].message.content, Solution
@@ -140,6 +143,8 @@ Let's think step by step to analyze the problem and plan a solution to the probl
             {"role": "user", "content": user_prompt},
         ],
         response_model=None,
+        max_tokens=MAX_TOKENS,
+        base_url="http://195.242.24.252:8000/v1",
     )
 
     formatted_response = await format_response(
@@ -185,6 +190,8 @@ Let's think step by step to solve the problem:
         messages=messages,
         response_model=None,
         temperature=temperature,
+        max_tokens=MAX_TOKENS,
+        base_url="http://195.242.24.252:8000/v1",
     )
 
     formatted_response = await format_response(
@@ -256,7 +263,15 @@ async def reflection(
         messages=messages,
         response_model=None,
         temperature=temperature,
+        max_tokens=MAX_TOKENS,
+        base_url="http://195.242.24.252:8000/v1",
     )
+    logger.info(f"Completion parameters:")
+    logger.info(f"  model: {model}")
+    logger.info(f"  messages: {messages}")
+    logger.info(f"  response_model: None")
+    logger.info(f"  temperature: {temperature}")
+    logger.info(f"  base_url: http://195.242.24.252:8000/v1")
     formatted_response = await format_response(
         response.choices[0].message.content, Reflection
     )
@@ -296,6 +311,8 @@ Let's think step by step to solve the problem correctly:
         messages=messages,
         response_model=None,
         temperature=temperature,
+        max_tokens=MAX_TOKENS,
+        base_url="http://195.242.24.252:8000/v1",
     )
     formatted_response = await format_response(
         response.choices[0].message.content, Solution

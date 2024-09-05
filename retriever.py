@@ -9,13 +9,11 @@ import pandas as pd
 import weave
 from datasets import load_dataset
 from joblib import Parallel, delayed
-from openai import AsyncOpenAI
 from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import cos_sim
 from simple_parsing import ArgumentParser
 
-from utils import (EMBEDDING_MODEL, Problem, Solution, clean_code_string,
-                   remove_extra_newlines)
+from utils import Problem, Solution, clean_code_string, remove_extra_newlines
 
 logging.basicConfig(
     format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
