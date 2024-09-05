@@ -10,7 +10,9 @@ import traceback
 from typing import Any, List
 
 import weave
+import instructor
 from instructor import from_openai
+
 from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 from tree_sitter_languages import get_language, get_parser
@@ -22,12 +24,18 @@ EMBEDDING_MODEL = "text-embedding-3-small"
 # oai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # async_client = from_openai(oai_client)
 
-async_client = from_openai(AsyncOpenAI(
-    base_url="http://195.242.24.252:8000/v1",
-    api_key="NO_KEY"))
+from litellm import acompletion
+async_client = instructor.from_litellm(acompletion, mode=instructor.Mode.JSON)
 
-FAST_LLM = "mistralai/Mistral-Nemo-Instruct-2407"
-STRONG_LLM = FAST_LLM
+FAST_LLM = "mistral/open-mistral-nemo-2407"
+STRONG_LLM = "mistral/mistral-large-latest"
+
+# async_client = from_openai(AsyncOpenAI(
+#     base_url="http://195.242.24.252:8000/v1",
+#     api_key="NO_KEY"))
+
+# FAST_LLM = "mistralai/Mistral-Nemo-Instruct-2407"
+# STRONG_LLM = FAST_LLM
 
 language = get_language("python")
 tree_parser = get_parser("python")
@@ -173,6 +181,7 @@ async def format_response(text: str, model: Any) -> Any:
             }
         ],
         response_model=model,
+        max_retries=5,
     )
     return formatted_response
 
