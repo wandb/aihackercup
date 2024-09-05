@@ -10,3 +10,4 @@ simple_parsing==0.1.5
 tree_sitter_languages==1.10.2
 tree-sitter==0.21.3
 weave==0.50.14
+sentence-transformers==3.0.1 

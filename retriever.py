@@ -10,8 +10,9 @@ import weave
 from datasets import load_dataset
 from joblib import Parallel, delayed
 from openai import AsyncOpenAI
+from sentence_transformers import SentenceTransformer
+from sentence_transformers.util import cos_sim
 from simple_parsing import ArgumentParser
-from sklearn.metrics.pairwise import cosine_similarity
 
 from utils import (EMBEDDING_MODEL, Problem, Solution, clean_code_string,
                    remove_extra_newlines)
@@ -220,16 +221,41 @@ def index_data(
     return retriever
 
 
-@weave.op(name="get_embeddings")
-async def get_embeddings(texts, model=EMBEDDING_MODEL):
-    async_client = AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
-    if isinstance(texts, str):
-        texts = [texts]
-    texts = [text.replace("\n", " ") for text in texts]
-    response = await async_client.embeddings.create(
-        input=texts, model=model, dimensions=512
-    )
-    return [embedding.embedding for embedding in response.data]
+class RerankModel:
+    def __init__(self):
+        self.model = SentenceTransformer(
+            "jinaai/jina-embeddings-v2-base-code", trust_remote_code=True
+        )
+
+        # control your input sequence length up to 8192
+        self.model.max_seq_length = 1024
+
+    def __call__(
+        self,
+        problem: Problem,
+        solution: Solution,
+        retrieved_docs: List[dict],
+        top_k: int = 3,
+    ):
+        query_text = problem.problem_description + " " + solution.source_code
+        context_text = [
+            doc["description"] + " " + doc["code"] for doc in retrieved_docs
+        ]
+
+        query_embeddings = self.model.encode([query_text])
+        context_embeddings = self.model.encode(context_text)
+        similarities = cos_sim(query_embeddings, context_embeddings)
+        docs_df = pd.DataFrame(retrieved_docs)
+        docs_df["similarity"] = similarities[0]
+        docs_df = docs_df.sort_values(by="similarity", ascending=False)
+        docs_df = docs_df.drop_duplicates(
+            subset=["description"],
+            keep="first",
+        )
+        return docs_df.head(top_k).to_dict(orient="records")
+
+
+rerank_model = RerankModel()
 
 
 @weave.op(name="rerank_docs")
@@ -239,22 +265,7 @@ async def rerank_docs(
     retrieved_docs: List[dict],
     top_k: int = 3,
 ) -> List[dict]:
-    query_embeddings = await get_embeddings(
-        problem.problem_description + " " + solution.source_code
-    )
-    docs_embeddings = await get_embeddings(
-        [doc["description"] + " " + doc["code"] for doc in retrieved_docs]
-    )
-
-    similarities = cosine_similarity(query_embeddings, docs_embeddings)
-    docs_df = pd.DataFrame(retrieved_docs)
-    docs_df["similarity"] = similarities[0]
-    docs_df = docs_df.sort_values(by="similarity", ascending=False)
-    docs_df = docs_df.drop_duplicates(
-        subset=["description"],
-        keep="first",
-    )
-    return docs_df.head(top_k).to_dict(orient="records")
+    return rerank_model(problem, solution, retrieved_docs, top_k)
 
 
 if __name__ == "__main__":
