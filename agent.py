@@ -90,6 +90,7 @@ Let's think step by step to solve the problem:
         temperature=temperature,
         max_tokens=MAX_TOKENS,
         base_url=BASE_URL,
+        max_retries=2
     )
     formatted_response = await format_response(
         response.choices[0].message.content, Solution
@@ -147,6 +148,7 @@ Let's think step by step to analyze the problem and plan a solution to the probl
         response_model=None,
         max_tokens=MAX_TOKENS,
         base_url=BASE_URL,
+        max_retries=2
     )
 
     try:
@@ -198,6 +200,7 @@ Let's think step by step to solve the problem:
         temperature=temperature,
         max_tokens=MAX_TOKENS,
         base_url=BASE_URL,
+        max_retries=2
     )
 
     formatted_response = await format_response(
@@ -271,6 +274,7 @@ async def reflection(
         temperature=temperature,
         max_tokens=MAX_TOKENS,
         base_url=BASE_URL,
+        max_retries=2
     )
     logger.info(f"Completion parameters:")
     logger.info(f"  model: {model}")
@@ -319,6 +323,7 @@ Let's think step by step to solve the problem correctly:
         temperature=temperature,
         max_tokens=MAX_TOKENS,
         base_url=BASE_URL,
+        max_retries=2
     )
     formatted_response = await format_response(
         response.choices[0].message.content, Solution
