@@ -163,6 +163,9 @@ Let's think step by step to analyze the problem and plan a solution to the probl
 
 @weave.op
 async def analyze_and_plan_solutions(docs: List[dict]) -> List[Analysis]:
+    '''
+    Create analysis for a list of solutions.
+    '''
     tasks = []
     for doc in docs:
         tasks.append(analyze_and_plan(doc))
@@ -369,9 +372,12 @@ async def rag_solver(
     logger.info("Iterating on a RAG solution")
 
     @weave.op
-    async def create_examplars(
+    async def generate_sample_solutions_from_code_dataset(
         problem: Problem, solution: Solution, top_k: int = 50, top_n: int = 5
     ):
+        '''
+        Create example solutions to the problem based on a draft solution.
+        '''
         logger.info(f"Generating examplars:")
         retrieve_docs = retriever.retrieve(solution.source_code, top_k)
         reranked_docs = await rerank_docs(problem, solution, retrieve_docs, top_n)
@@ -388,7 +394,7 @@ async def rag_solver(
         timeout: int = timeout,
     ) -> dict:
         logger.info(f"Generating RAG solution:")
-        examplars = await create_examplars(problem, draft_solution)
+        examplars = await generate_sample_solutions_from_code_dataset(problem, draft_solution)
         rag_solution = await generate_solution(
             problem=problem,
             examples=examplars,
