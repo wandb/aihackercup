@@ -134,7 +134,7 @@ Finally, generate the pseudocode to solve the problem.
 
 
 @weave.op
-async def describe_example(example: dict) -> Analysis:
+async def analyze_and_plan(example: dict) -> Analysis:
     user_prompt = f"""{format_example(example)}
 
 Let's think step by step to analyze the problem and plan a solution to the problem:
@@ -162,10 +162,10 @@ Let's think step by step to analyze the problem and plan a solution to the probl
 
 
 @weave.op
-async def describe_examples(docs: List[dict]) -> List[Analysis]:
+async def analyze_and_plan_solutions(docs: List[dict]) -> List[Analysis]:
     tasks = []
     for doc in docs:
-        tasks.append(describe_example(doc))
+        tasks.append(analyze_and_plan(doc))
     descriptions = await asyncio.gather(*tasks)
     return descriptions
 
@@ -375,7 +375,7 @@ async def rag_solver(
         logger.info(f"Generating examplars:")
         retrieve_docs = retriever.retrieve(solution.source_code, top_k)
         reranked_docs = await rerank_docs(problem, solution, retrieve_docs, top_n)
-        analyses = await describe_examples(reranked_docs)
+        analyses = await analyze_and_plan_solutions(reranked_docs)
         examplars = format_examples(reranked_docs, analyses)
         return examplars
 
