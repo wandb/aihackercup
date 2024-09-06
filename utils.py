@@ -26,6 +26,8 @@ from tree_sitter_languages import get_language, get_parser
 BASE_URL = os.getenv("BASE_URL", None)
 MAX_TOKENS = os.getenv("MAX_TOKENS", 2048)
 
+os.environ["OPENAI_API_KEY"] = "dummy_key" # lite llm is not using the api key
+
 from litellm import acompletion
 async_client = instructor.from_litellm(acompletion, mode=instructor.Mode.JSON)
 
