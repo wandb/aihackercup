@@ -141,7 +141,7 @@ def process_code_string(code_in_str):
 def check_correctness(
     program: str, input_data: str, expected_output: str, timeout: float
 ) -> str:
-    program = process_code_string(program)
+    # program = process_code_string(program)
     q = multiprocessing.Queue()
     process = multiprocessing.Process(
         target=exec_program, args=(q, program, input_data, expected_output, timeout)
