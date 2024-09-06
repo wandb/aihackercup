@@ -127,7 +127,7 @@ def exec_program(q, program, input_data, expected_output, timeout):
 
 import ast
 
-@weave.op(name="process_code_string")
+@weave.op
 def process_code_string(code_in_str):
     try:
         # Safely parse the string using literal_eval
@@ -137,7 +137,7 @@ def process_code_string(code_in_str):
         print(f"Error processing string: {e}")
         return None
 
-@weave.op(name="check_correctness")
+@weave.op
 def check_correctness(
     program: str, input_data: str, expected_output: str, timeout: float
 ) -> str:
@@ -160,7 +160,7 @@ def check_correctness(
     return result
 
 
-@weave.op(name="format_response")
+@weave.op
 async def format_response(text: str, model: Any) -> Any:
     formatted_response = await async_client.chat.completions.create(
         model=FAST_LLM,
@@ -171,7 +171,7 @@ async def format_response(text: str, model: Any) -> Any:
             }
         ],
         response_model=model,
-        max_retries=5,
+        max_retries=2,
         max_tokens=MAX_TOKENS,
         base_url=BASE_URL,
     )

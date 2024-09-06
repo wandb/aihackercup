@@ -156,7 +156,7 @@ def normalize_code(code: str) -> Optional[str]:
     tokens = list(tokenize_node(tree))
     return " ".join(tokens)
 
-
+@weave.op
 def normalize_code_list(code_list: list[str]) -> list[str]:
     if len(code_list) > 1000:
         return Parallel(n_jobs=-1)(delayed(normalize_code)(code) for code in code_list)
@@ -194,7 +194,7 @@ class Retriever:
         retriever.index(corpus_tokens)
         return retriever
 
-    @weave.op(name="retrieve_docs")
+    @weave.op
     def retrieve(self, query: str, k: int = 10):
         clean_query = clean_code_string(query)
         normalized_query = normalize_code(clean_query)
@@ -228,6 +228,7 @@ class RerankModel:
         # control your input sequence length up to 8192
         self.model.max_seq_length = 1024
 
+    @weave.op
     def __call__(
         self,
         problem: Problem,
@@ -256,7 +257,7 @@ class RerankModel:
 rerank_model = RerankModel()
 
 
-@weave.op(name="rerank_docs")
+@weave.op
 async def rerank_docs(
     problem: Problem,
     solution: Solution,

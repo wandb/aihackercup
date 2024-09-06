@@ -90,6 +90,7 @@ Let's think step by step to solve the problem:
         temperature=temperature,
         max_tokens=MAX_TOKENS,
         base_url=BASE_URL,
+        max_retries=2
     )
     formatted_response = await format_response(
         response.choices[0].message.content, Solution
@@ -133,7 +134,7 @@ Finally, generate the pseudocode to solve the problem.
 
 
 @weave.op
-async def describe_example(example: dict) -> Analysis:
+async def analyze_and_plan(example: dict) -> Analysis:
     user_prompt = f"""{format_example(example)}
 
 Let's think step by step to analyze the problem and plan a solution to the problem:
@@ -147,6 +148,7 @@ Let's think step by step to analyze the problem and plan a solution to the probl
         response_model=None,
         max_tokens=MAX_TOKENS,
         base_url=BASE_URL,
+        max_retries=2
     )
 
     try:
@@ -160,10 +162,13 @@ Let's think step by step to analyze the problem and plan a solution to the probl
 
 
 @weave.op
-async def describe_examples(docs: List[dict]) -> List[Analysis]:
+async def analyze_and_plan_solutions(docs: List[dict]) -> List[Analysis]:
+    '''
+    Create analysis for a list of solutions.
+    '''
     tasks = []
     for doc in docs:
-        tasks.append(describe_example(doc))
+        tasks.append(analyze_and_plan(doc))
     descriptions = await asyncio.gather(*tasks)
     return descriptions
 
@@ -198,6 +203,7 @@ Let's think step by step to solve the problem:
         temperature=temperature,
         max_tokens=MAX_TOKENS,
         base_url=BASE_URL,
+        max_retries=2
     )
 
     formatted_response = await format_response(
@@ -271,6 +277,7 @@ async def reflection(
         temperature=temperature,
         max_tokens=MAX_TOKENS,
         base_url=BASE_URL,
+        max_retries=2
     )
     logger.info(f"Completion parameters:")
     logger.info(f"  model: {model}")
@@ -319,6 +326,7 @@ Let's think step by step to solve the problem correctly:
         temperature=temperature,
         max_tokens=MAX_TOKENS,
         base_url=BASE_URL,
+        max_retries=2
     )
     formatted_response = await format_response(
         response.choices[0].message.content, Solution
@@ -328,7 +336,7 @@ Let's think step by step to solve the problem correctly:
 
 @weave.op
 async def zero_shot_solver(
-    problem: Problem, model: str = FAST_LLM, temperature: float = 0.0, timeout: int = 10
+    problem: Problem, model: str = FAST_LLM, temperature: float = 0.7, timeout: int = 10
 ) -> dict:
     logger.info("Drafting intial zero-shot solution")
     solution = await draft_solution(
@@ -364,13 +372,16 @@ async def rag_solver(
     logger.info("Iterating on a RAG solution")
 
     @weave.op
-    async def create_examplars(
+    async def generate_sample_solutions_from_code_dataset(
         problem: Problem, solution: Solution, top_k: int = 50, top_n: int = 5
     ):
+        '''
+        Create example solutions to the problem based on a draft solution.
+        '''
         logger.info(f"Generating examplars:")
         retrieve_docs = retriever.retrieve(solution.source_code, top_k)
         reranked_docs = await rerank_docs(problem, solution, retrieve_docs, top_n)
-        analyses = await describe_examples(reranked_docs)
+        analyses = await analyze_and_plan_solutions(reranked_docs)
         examplars = format_examples(reranked_docs, analyses)
         return examplars
 
@@ -379,11 +390,11 @@ async def rag_solver(
         problem: Problem,
         draft_solution: Solution,
         model: str = STRONG_LLM,
-        temperature: float = 0.0,
+        temperature: float = 0.7,
         timeout: int = timeout,
     ) -> dict:
         logger.info(f"Generating RAG solution:")
-        examplars = await create_examplars(problem, draft_solution)
+        examplars = await generate_sample_solutions_from_code_dataset(problem, draft_solution)
         rag_solution = await generate_solution(
             problem=problem,
             examples=examplars,
@@ -445,7 +456,7 @@ async def rag_solver_with_reflection(
     retriever: Retriever,
     problem: Problem,
     model: str = FAST_LLM,
-    temperature: float = 0.0,
+    temperature: float = 0.7,
     max_iterations: int = 2,
     timeout: int = 10,
 ):
