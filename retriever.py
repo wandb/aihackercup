@@ -241,7 +241,7 @@ class RerankModel:
         ]
 
         query_embeddings = self.model.encode([query_text])
-        context_embeddings = self.model.encode(context_text)
+        context_embeddings = self.model.encode(context_text, batch_size=2)
         similarities = cos_sim(query_embeddings, context_embeddings)
         docs_df = pd.DataFrame(retrieved_docs)
         docs_df["similarity"] = similarities[0]

@@ -16,23 +16,16 @@ from pydantic import BaseModel, Field
 from tree_sitter_languages import get_language, get_parser
 
 
-# EMBEDDING_MODEL = "text-embedding-3-small"
-# FAST_LLM = "gpt-4o-mini"
-# STRONG_LLM = "gpt-4o"
-# from instructor import from_openai
-# oai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-# async_client = from_openai(oai_client)
-
 BASE_URL = os.getenv("BASE_URL", None)
-MAX_TOKENS = os.getenv("MAX_TOKENS", 2048)
+MAX_TOKENS = os.getenv("MAX_TOKENS", 4096)
+FAST_LLM = os.getenv("FAST_LLM", "mistral/open-mistral-nemo-2407")
+STRONG_LLM = os.getenv("STRONG_LLM", "mistral/mistral-large-latest")
 
-os.environ["OPENAI_API_KEY"] = "dummy_key" # lite llm is not using the api key
+os.environ["OPENAI_API_KEY"] = "dummy_key" # so that litellm will work
 
 from litellm import acompletion
 async_client = instructor.from_litellm(acompletion, mode=instructor.Mode.JSON)
 
-FAST_LLM = "mistral/open-mistral-nemo-2407"
-STRONG_LLM = "mistral/mistral-large-latest"
 
 language = get_language("python")
 tree_parser = get_parser("python")
