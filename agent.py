@@ -16,7 +16,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-MAX_TOKENS = os.getenv("MAX_TOKENS", 2048)
+MAX_TOKENS = os.getenv("MAX_TOKENS", 4096)
 BASE_URL = os.getenv("BASE_URL", None)
 
 SOLVER_INSTRUCTIONS = """You are a world-class competitive programmer tasked with solving a programming problem. 
@@ -149,10 +149,14 @@ Let's think step by step to analyze the problem and plan a solution to the probl
         base_url=BASE_URL,
     )
 
-    formatted_response = await format_response(
-        response.choices[0].message.content, Analysis
-    )
-    return formatted_response
+    try:
+        formatted_response = await format_response(
+            response.choices[0].message.content, Analysis
+        )
+        return formatted_response
+    except Exception as e:
+        logger.error(f"Error formatting response: {e}")
+        return ""
 
 
 @weave.op
