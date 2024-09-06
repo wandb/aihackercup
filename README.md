@@ -1,39 +1,35 @@
-This folder contains the implementation of a RAG agent to solve the Hacker Cup problems using LLMs.
-It includes scripts for downloading and preprocessing the datasets and generating solutions using a Retrieval Model.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wandb/wandb/main/assets/logo-dark.svg#gh-dark-mode-only" width="600" alt="Weights & Biases" />
+  <img src="https://raw.githubusercontent.com/wandb/wandb/main/assets/logo-light.svg#gh-light-mode-only" width="600" alt="Weights & Biases" />
+</p>
 
-The RAG agent is based on a combination of a retriever and a generator model.
-The retriever is used to retrieve similar historical problems and solutions from
-the [codecontests](https://huggingface.co/datasets/deepmind/code_contests) dataset and prompt an LLM with few-shot
-examples to generate solutions for the current problem.
-
-You can learn more about the approach in this youtube video:
-
-<a target="_blank" href="https://www.youtube.com/watch?v=cObBj2UpWK8">
-<img src="https://img.youtube.com/vi/cObBj2UpWK8/0.jpg" width="600" height="450">
-</a>
-
-## Contents
-
-1. `demo.ipynb`: this notebook contains a full walkthrough of the RAG agent and how to use it to solve Hacker Cup
-   problems.
-2. `retriever.py`: this script contains the implementation of the retriever we used.
-3. `agent.py`: this script contains the implementation of three different agents we used to solve the problems.
-4. `utils.py`: utility functions used in retrieving and generating solutions.
-5. `requirements.txt`: list of required packages to run the code.
+# Lightning Competition - AI Hacker Cup
 
 
-## W&B Lightning Competition 
+[Weights & Biases](https://wandb.ai/site?utm_source=github&utm_medium=code&utm_campaign=lightning-ai-hacker-cup) are running a 7-day Lightning Competition focussed on solving practice problems for the  [2024 NeurIPS AI Hacker Cup](https://hackercupai.github.io/) challenge. The competition involves solving very challenging logic problems using code.
+
+#### Goal
+The goal is to try and solve all 5 of the 2023 practice questions for the AI Hacker Cup using MistralAI's models. We’re offering free MistralAI api access via the code in this colab to get people started.
 
 ### Deadline
 
-The deadline to submit winning solutions is Friday 13th, 8am PT / 5pm CET.
+The deadline to submit winning solutions is Monday October 16th , 8am PT / 5pm CET.
+
+### Prizes 
+
+Weights & Biases are giving away a pair of Meta Ray-Ban Smart Glasses for the first individual to submit code that solves:
+- 3 out of 5 correct solutions
+- 4 out of 5 correct solutions
+- 5 out of 5 correct solutions
+
+(i.e. in total 3 pairs of sunglasses to give away)
 
 ### Submissions
 
 To submit code for verification you neeed to submit the following to the [Submissions Form](ADD SUBMISSIONS FORM LINK):
 
 - a zipped directory with a README and a requirements.txt
-- a link to the [W&B Weave](https://weave-docs.wandb.ai/tutorial-eval?utm_source=colab&utm_medium=code&utm_campaign=lightning-ai-hacker-cup) evaluation
+- a link to the [W&B Weave](https://weave-docs.wandb.ai/tutorial-eval?utm_source=github&utm_medium=code&utm_campaign=lightning-ai-hacker-cup) evaluation
 
 
 ### Rules
@@ -67,6 +63,30 @@ There will be a 30minute time limit to generate solutions for all 5 problems, th
 **One prize per individual**
 
 An individual can only win 1 single prize. i.e. if you are the first to solve 4 out of 5 challenges you are not eligible to win a second pair of Ray-Bans. Working in teams are allowed but there is only 1 pair of Ray-Ban per prize category, i.e. you'll have to figure out how to divide 1 pair of sunglasses among 2+ people.
+
+This folder contains the implementation of a RAG agent to solve the Hacker Cup problems using LLMs.
+It includes scripts for downloading and preprocessing the datasets and generating solutions using a Retrieval Model.
+
+The RAG agent is based on a combination of a retriever and a generator model.
+The retriever is used to retrieve similar historical problems and solutions from
+the [codecontests](https://huggingface.co/datasets/deepmind/code_contests) dataset and prompt an LLM with few-shot
+examples to generate solutions for the current problem.
+
+You can learn more about the approach in this youtube video:
+
+<a target="_blank" href="https://www.youtube.com/watch?v=cObBj2UpWK8">
+<img src="https://img.youtube.com/vi/cObBj2UpWK8/0.jpg" width="600" height="450">
+</a>
+
+## Contents
+
+1. `demo.ipynb`: this notebook contains a full walkthrough of the RAG agent and how to use it to solve Hacker Cup
+   problems.
+2. `retriever.py`: this script contains the implementation of the retriever we used.
+3. `agent.py`: this script contains the implementation of three different agents we used to solve the problems.
+4. `utils.py`: utility functions used in retrieving and generating solutions.
+5. `requirements.txt`: list of required packages to run the code.
+
 
 
 ## Download Full Raw Dataset
