@@ -69,3 +69,35 @@ There will be a 30minute time limit to generate solutions for all 5 problems, th
 An individual can only win 1 single prize. i.e. if you are the first to solve 4 out of 5 challenges you are not eligible to win a second pair of Ray-Bans. Working in teams are allowed but there is only 1 pair of Ray-Ban per prize category, i.e. you'll have to figure out how to divide 1 pair of sunglasses among 2+ people.
 
 
+## Download Full Raw Dataset
+
+Alternatively, you can download the dataset by running the download script from the [submit-first-solution](https://github.com/HackerCupAI/starter-kits/tree/main/submit_first_solution). Specifically, you can run the following command to download the dataset:
+
+```bash
+python download.py --year 2023 --dataset_folder data
+```
+
+
+This should create a `dataset` folder with the problems and solutions. Here's an example of what the data looks like for the `dim_sum_delivery` problem from the `2023` season:
+
+```
+data/dataset/2023/practice
+...
+├── dim_sum_delivery.cpp
+├── dim_sum_delivery.in
+├── dim_sum_delivery.md
+├── dim_sum_delivery.out
+├── dim_sum_delivery_sample_input.txt
+├── dim_sum_delivery_sample_output.txt
+├── dim_sum_delivery_sol.md
+...
+```
+
+Each problem has a `in`, `out`, `md`, `cpp`, and `sol` file.
+
+The `in` file contains the input data for the problem.
+The `out` file contains the expected output for the problem.
+The `md` file contains the problem statement.
+The `cpp` file contains the source code to the solution.
+The `sol` file contains the detailed solution to the problem.
+The `sample_input.txt` and `sample_output.txt` files contain the sample input and output for the problem. These are the test cases that will be available to the agent during development and evaluation.
