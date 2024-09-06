@@ -64,8 +64,9 @@ There will be a 30minute time limit to generate solutions for all 5 problems, th
 
 An individual can only win 1 single prize. i.e. if you are the first to solve 4 out of 5 challenges you are not eligible to win a second pair of Ray-Bans. Working in teams are allowed but there is only 1 pair of Ray-Ban per prize category, i.e. you'll have to figure out how to divide 1 pair of sunglasses among 2+ people.
 
-This folder contains the implementation of a RAG agent to solve the Hacker Cup problems using LLMs.
-It includes scripts for downloading and preprocessing the datasets and generating solutions using a Retrieval Model.
+## Resources
+
+This folder contains the implementation of a RAG agent to solve the Hacker Cup problems using LLMs. It includes a colab and code for downloading and preprocessing the datasets and generating solutions using a Retrieval Model.
 
 The RAG agent is based on a combination of a retriever and a generator model.
 The retriever is used to retrieve similar historical problems and solutions from
