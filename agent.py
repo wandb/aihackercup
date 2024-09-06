@@ -328,7 +328,7 @@ Let's think step by step to solve the problem correctly:
 
 @weave.op
 async def zero_shot_solver(
-    problem: Problem, model: str = FAST_LLM, temperature: float = 0.0, timeout: int = 10
+    problem: Problem, model: str = FAST_LLM, temperature: float = 0.7, timeout: int = 10
 ) -> dict:
     logger.info("Drafting intial zero-shot solution")
     solution = await draft_solution(
@@ -379,7 +379,7 @@ async def rag_solver(
         problem: Problem,
         draft_solution: Solution,
         model: str = STRONG_LLM,
-        temperature: float = 0.0,
+        temperature: float = 0.7,
         timeout: int = timeout,
     ) -> dict:
         logger.info(f"Generating RAG solution:")
@@ -445,7 +445,7 @@ async def rag_solver_with_reflection(
     retriever: Retriever,
     problem: Problem,
     model: str = FAST_LLM,
-    temperature: float = 0.0,
+    temperature: float = 0.7,
     max_iterations: int = 2,
     timeout: int = 10,
 ):
