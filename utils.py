@@ -10,6 +10,7 @@ import traceback
 from typing import Any, List
 
 import weave
+import openai
 import instructor
 
 from pydantic import BaseModel, Field
@@ -18,14 +19,11 @@ from tree_sitter_languages import get_language, get_parser
 
 BASE_URL = os.getenv("BASE_URL", None)
 MAX_TOKENS = os.getenv("MAX_TOKENS", 4096)
-FAST_LLM = os.getenv("FAST_LLM", "mistral/open-mistral-nemo-2407")
-STRONG_LLM = os.getenv("STRONG_LLM", "mistral/mistral-large-latest")
+FAST_LLM = os.getenv("FAST_LLM", "open-mistral-nemo-2407")
+STRONG_LLM = os.getenv("STRONG_LLM", "mistral-large-latest")
 
-os.environ["OPENAI_API_KEY"] = "dummy_key" # so that litellm will work
-
-from litellm import acompletion
-async_client = instructor.from_litellm(acompletion, mode=instructor.Mode.JSON)
-
+oai_client = openai.AsyncOpenAI(base_url=BASE_URL, api_key="dummy_key")
+async_client = instructor.from_openai(oai_client)
 
 language = get_language("python")
 tree_parser = get_parser("python")
@@ -127,15 +125,15 @@ def exec_program(q, program, input_data, expected_output, timeout):
 
 import ast
 
-@weave.op
-def process_code_string(code_in_str):
-    try:
-        # Safely parse the string using literal_eval
-        processed_code = ast.literal_eval(f'"""{code_in_str}"""')
-        return processed_code
-    except ValueError as e:
-        print(f"Error processing string: {e}")
-        return None
+# @weave.op
+# def process_code_string(code_in_str):
+#     try:
+#         # Safely parse the string using literal_eval
+#         processed_code = ast.literal_eval(f'"""{code_in_str}"""')
+#         return processed_code
+#     except ValueError as e:
+#         print(f"Error processing string: {e}")
+#         return None
 
 @weave.op
 def check_correctness(
@@ -173,7 +171,6 @@ async def format_response(text: str, model: Any) -> Any:
         response_model=model,
         max_retries=2,
         max_tokens=MAX_TOKENS,
-        base_url=BASE_URL,
     )
     return formatted_response
 
