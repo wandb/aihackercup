@@ -31,8 +31,8 @@ os.environ["OPENAI_API_KEY"] = "dummy_key" # lite llm is not using the api key
 from litellm import acompletion
 async_client = instructor.from_litellm(acompletion, mode=instructor.Mode.JSON)
 
-FAST_LLM = "mistral/open-mistral-nemo-2407"
-STRONG_LLM = "mistral/mistral-large-latest"
+# FAST_LLM = "mistral/open-mistral-nemo-2407"
+# STRONG_LLM = "mistral/mistral-large-latest"
 
 language = get_language("python")
 tree_parser = get_parser("python")
