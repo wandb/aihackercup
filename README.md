@@ -3,7 +3,7 @@
   <img src="https://raw.githubusercontent.com/wandb/wandb/main/assets/logo-light.svg#gh-light-mode-only" width="600" alt="Weights & Biases" />
 </p>
 
-# Lightning Competition - AI Hacker Cup
+# ⚡️ Competition - AI Hacker Cup
 
 
 [Weights & Biases](https://wandb.ai/site?utm_source=github&utm_medium=code&utm_campaign=lightning-ai-hacker-cup) are running a 7-day Lightning Competition focussed on solving practice problems for the  [2024 NeurIPS AI Hacker Cup](https://hackercupai.github.io/) challenge. The competition involves solving very challenging logic problems using code.
