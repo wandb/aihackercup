@@ -103,7 +103,7 @@ Let's think step by step to solve the problem:
         raise_in_weave(raise_error=True, msg=err_msg)
         return Solution(
             core_question=err_msg,
-            problem_solving_info=err_msg,
+            problem_solving_info=[err_msg],
             algorithm=err_msg,
             tutorial=err_msg,
             plan=err_msg,
@@ -175,7 +175,7 @@ Let's think step by step to analyze the problem and plan a solution to the probl
         raise_in_weave(raise_error=True, msg=err_msg)
         return Analysis(
             core_question=err_msg,
-            problem_solving_info=err_msg,
+            problem_solving_info=[err_msg],
             algorithm=err_msg,
             tutorial=err_msg,
             plan=err_msg,
@@ -237,7 +237,7 @@ Let's think step by step to solve the problem:
         raise_in_weave(raise_error=True, msg=err_msg)
         return Solution(
             core_question=err_msg,
-            problem_solving_info=err_msg,
+            problem_solving_info=[err_msg],
             algorithm=err_msg,
             tutorial=err_msg,
             plan=err_msg,
@@ -383,7 +383,7 @@ Let's think step by step to solve the problem correctly:
         logger.error(err_msg)
         return Solution(
             core_question=err_msg,
-            problem_solving_info=err_msg,
+            problem_solving_info=[err_msg],
             algorithm=err_msg,
             tutorial=err_msg,
             plan=err_msg,
