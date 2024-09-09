@@ -100,6 +100,7 @@ Let's think step by step to solve the problem:
     except Exception as e:
         err_msg = f"Error formatting response: {e}"
         logger.error(err_msg)
+        raise_in_weave(raise_error=True, msg=err_msg)
         return Solution(
             core_question=err_msg,
             problem_solving_info=err_msg,
@@ -171,6 +172,7 @@ Let's think step by step to analyze the problem and plan a solution to the probl
     except Exception as e:
         err_msg = f"Error formatting response: {e}"
         logger.error(err_msg)
+        raise_in_weave(raise_error=True, msg=err_msg)
         return Analysis(
             core_question=err_msg,
             problem_solving_info=err_msg,
@@ -232,6 +234,7 @@ Let's think step by step to solve the problem:
     except Exception as e:
         err_msg = f"Error formatting response: {e}"
         logger.error(err_msg)
+        raise_in_weave(raise_error=True, msg=err_msg)
         return Solution(
             core_question=err_msg,
             problem_solving_info=err_msg,
@@ -317,6 +320,7 @@ async def reflection(
     except Exception as e:
         err_msg = f"Error formatting response: {e}"
         logger.error(err_msg)
+        raise_in_weave(raise_error=True, msg=err_msg)
         return Reflection(
             reflection=err_msg,
             keywords=err_msg,
