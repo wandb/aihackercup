@@ -95,7 +95,7 @@ Let's think step by step to solve the problem:
         formatted_response = await format_response(
             response.choices[0].message.content, Solution
         )
-        assert type(formatted_response) == Solution, "Response must be a Solution object"
+        assert isinstance(formatted_response, Solution), "Response must be a Solution object"
         return formatted_response
     except Exception as e:
         err_msg = f"Error formatting response: {e}"
@@ -429,7 +429,7 @@ async def rag_solver(
         timeout=timeout,
     )
     solution = zero_shot_result["solution"]
-    assert type(solution) == Solution, "Solution must be a Solution object"
+    assert isinstance(solution, Solution), "Solution must be a Solution object"
 
     test_report = zero_shot_result["test_report"]
     if test_report == "passed":
@@ -443,8 +443,8 @@ async def rag_solver(
         '''
         Create example solutions to the problem based on a draft solution.
         '''
-        assert type(problem) == Problem, "Problem must be a Problem object"
-        assert type(solution) == Solution, "Solution must be a Solution object"
+        assert isinstance(problem, Problem), "Problem must be a Problem object"
+        assert isinstance(solution, Solution), "Solution must be a Solution object"
         logger.info(f"Generating examplars:")
         retrieve_docs = retriever.retrieve(solution.source_code, top_k)
         reranked_docs = await rerank_docs(problem, solution, retrieve_docs, top_n)
