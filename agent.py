@@ -530,6 +530,7 @@ async def rag_solver_with_reflection(
     num_iterations = 0
     test_report = "failed"
     solution = None
+    assert isinstance(problem, Problem), "problem must be a Problem object"
     while not test_report == "passed" and num_iterations < max_iterations:
         rag_result = await rag_solver(
             retriever=retriever,
