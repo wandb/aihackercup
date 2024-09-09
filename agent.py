@@ -95,6 +95,7 @@ Let's think step by step to solve the problem:
         formatted_response = await format_response(
             response.choices[0].message.content, Solution
         )
+        assert type(formatted_response) == Solution, "Response must be a Solution object"
         return formatted_response
     except Exception as e:
         err_msg = f"Error formatting response: {e}"
@@ -418,6 +419,8 @@ async def rag_solver(
         timeout=timeout,
     )
     solution = zero_shot_result["solution"]
+    assert type(solution) == Solution, "Solution must be a Solution object"
+
     test_report = zero_shot_result["test_report"]
     if test_report == "passed":
         return zero_shot_result
