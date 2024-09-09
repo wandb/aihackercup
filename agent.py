@@ -331,9 +331,15 @@ async def reflection(
 
 @weave.op
 def raise_in_weave(raise_error: bool = False, msg: str = ""):
-    if raise_error:
-        raise Exception(msg)
-    else: 
+    """
+    Show an error message in Weave while continuing execution.
+    """
+    try:
+        if raise_error:
+            raise Exception(msg)
+        else:
+            pass
+    except Exception as e:
         pass
 
 @weave.op

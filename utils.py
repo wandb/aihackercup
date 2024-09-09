@@ -162,6 +162,7 @@ def check_correctness(
 async def format_response(text: str, model: Any) -> Any:
     formatted_response = await async_client.chat.completions.create(
         model=FAST_LLM,
+        # Instructor adds a system message by default about how to format the response given the response model.
         messages=[
             {
                 "role": "user",
