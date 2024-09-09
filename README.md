@@ -9,7 +9,7 @@
 [Weights & Biases](https://wandb.ai/site?utm_source=github&utm_medium=code&utm_campaign=lightning-ai-hacker-cup) are running a 7-day Lightning Competition focussed on solving practice problems for the  [2024 NeurIPS AI Hacker Cup](https://hackercupai.github.io/) challenge. The competition involves solving very challenging logic problems using code.
 
 #### Goal
-The goal is to try and solve all 5 of the 2023 practice questions for the AI Hacker Cup using MistralAI's models. We’re offering free MistralAI api access via the code in this colab to get people started.
+The goal is to try and solve all 5 of the 2023 practice questions for the AI Hacker Cup using MistralAI's models. We’re offering free MistralAI api access via the code in this colab to get people started. For context, the notebook included in this repo can consistently get 2 out of 5 solutions correct using Mistral Large.
 
 ### Deadline
 
@@ -31,6 +31,7 @@ To submit code for verification you neeed to submit the following to the **[Subm
 - a zipped directory with a README and a requirements.txt
 - a link to the [W&B Weave](https://weave-docs.wandb.ai/tutorial-eval?utm_source=github&utm_medium=code&utm_campaign=lightning-ai-hacker-cup) evaluation
 
+You can use your own code to generate solutions or you can modify the code in this repo. The one requirement is that evaluations must be run using W&B Weave as we'll be using those logs to help verify winning solutions.
 
 ### Rules
 
@@ -58,7 +59,7 @@ This quick competition isn't focussed on fine-tuning models, only the vanilla Mi
 
 **Time Limit**
 
-There will be a 30minute time limit to generate solutions for all 5 problems, the MistraAI api will be used when running the submitted code.
+There will be a 20 minute time limit to generate solutions for all 5 problems, the MistraAI api will be used when running the submitted code.
 
 **One prize per individual**
 
