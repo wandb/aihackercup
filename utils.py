@@ -23,7 +23,7 @@ FAST_LLM = os.getenv("FAST_LLM", "open-mistral-nemo-2407")
 STRONG_LLM = os.getenv("STRONG_LLM", "mistral-large-latest")
 
 oai_client = openai.AsyncOpenAI(base_url=BASE_URL, api_key="dummy_key")
-async_client = instructor.from_openai(oai_client)
+async_client = instructor.from_openai(oai_client, mode=instructor.Mode.JSON)
 
 language = get_language("python")
 tree_parser = get_parser("python")
