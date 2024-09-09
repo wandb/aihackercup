@@ -26,7 +26,7 @@ Weights & Biases are giving away a pair of Meta Ray-Ban Smart Glasses for the fi
 
 ### Submissions
 
-To submit code for verification you neeed to submit the following to the [Submissions Form](ADD SUBMISSIONS FORM LINK):
+To submit code for verification you neeed to submit the following to the **[Submissions Form](https://forms.gle/5t3SgaxR11FhGAGX6)**:
 
 - a zipped directory with a README and a requirements.txt
 - a link to the [W&B Weave](https://weave-docs.wandb.ai/tutorial-eval?utm_source=github&utm_medium=code&utm_campaign=lightning-ai-hacker-cup) evaluation
@@ -46,7 +46,7 @@ All winning submissions code can and will be open sourced by W&B to be eligible 
 
 **Reproducibility**
 
-Solutions must be reproducible, runnable code must be submitted and verified by W&B team. 
+Solutions must be reproducible, runnable code must be submitted and verified by W&B team. Given the non-deterministic nature of LLM outputs, solutions must cross the prize winning threshold in at least 2 out of 3 trials. i.e. if you submit for first to 3 out of 5 solved, your codebase must hit this performance twice out of three possible attempts.
 
 **Weave Evaluations**
 
