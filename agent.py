@@ -91,10 +91,23 @@ Let's think step by step to solve the problem:
         max_tokens=MAX_TOKENS,
         max_retries=2
     )
-    formatted_response = await format_response(
-        response.choices[0].message.content, Solution
-    )
-    return formatted_response
+    try:
+        formatted_response = await format_response(
+            response.choices[0].message.content, Solution
+        )
+        return formatted_response
+    except Exception as e:
+        err_msg = f"Error formatting response: {e}"
+        logger.error(err_msg)
+        return Solution(
+            core_question=err_msg,
+            problem_solving_info=err_msg,
+            algorithm=err_msg,
+            tutorial=err_msg,
+            plan=err_msg,
+            pseudocode=err_msg,
+            source_code=err_msg,
+        )
 
 
 ANALYSIS_INSTRUCTIONS = """You are an expert programming analyst with a deep understanding of competitive programming.
@@ -155,8 +168,16 @@ Let's think step by step to analyze the problem and plan a solution to the probl
         )
         return formatted_response
     except Exception as e:
-        logger.error(f"Error formatting response: {e}")
-        return ""
+        err_msg = f"Error formatting response: {e}"
+        logger.error(err_msg)
+        return Analysis(
+            core_question=err_msg,
+            problem_solving_info=err_msg,
+            algorithm=err_msg,
+            tutorial=err_msg,
+            plan=err_msg,
+            pseudocode=err_msg,
+        )
 
 
 @weave.op
@@ -202,11 +223,23 @@ Let's think step by step to solve the problem:
         max_tokens=MAX_TOKENS,
         max_retries=2
     )
-
-    formatted_response = await format_response(
-        response.choices[0].message.content, Solution
-    )
-    return formatted_response
+    try:
+        formatted_response = await format_response(
+            response.choices[0].message.content, Solution
+        )
+        return formatted_response
+    except Exception as e:
+        err_msg = f"Error formatting response: {e}"
+        logger.error(err_msg)
+        return Solution(
+            core_question=err_msg,
+            problem_solving_info=err_msg,
+            algorithm=err_msg,
+            tutorial=err_msg,
+            plan=err_msg,
+            pseudocode=err_msg,
+            source_code=err_msg,
+        )
 
 
 REFLECTION_INSTRUCTIONS = """You are a world-class competitive programmer with a keen eye for detail and problem solving. 
@@ -275,11 +308,28 @@ async def reflection(
         max_tokens=MAX_TOKENS,
         max_retries=2
     )
-    formatted_response = await format_response(
-        response.choices[0].message.content, Reflection
-    )
-    return formatted_response
+    try:
+        formatted_response = await format_response(
+            response.choices[0].message.content, Reflection
+        ) 
+        return formatted_response  
+    except Exception as e:
+        err_msg = f"Error formatting response: {e}"
+        logger.error(err_msg)
+        return Reflection(
+            reflection=err_msg,
+            keywords=err_msg,
+            step_by_step_solution=err_msg,
+            instructions=err_msg,
+            general_advice=err_msg,
+        )
 
+@weave.op
+def raise_in_weave(raise_error: bool = False, msg: str = ""):
+    if raise_error:
+        raise Exception(msg)
+    else: 
+        pass
 
 @weave.op
 async def improve_solution(
@@ -317,11 +367,24 @@ Let's think step by step to solve the problem correctly:
         max_tokens=MAX_TOKENS,
         max_retries=2
     )
-    formatted_response = await format_response(
-        response.choices[0].message.content, Solution
-    )
-    return formatted_response
-
+    try:
+        formatted_response = await format_response(
+            response.choices[0].message.content, Solution
+        )
+        return formatted_response
+    except Exception as e:
+        err_msg = f"Error formatting response: {e}"
+        raise_in_weave(raise_error=True, msg=err_msg)
+        logger.error(err_msg)
+        return Solution(
+            core_question=err_msg,
+            problem_solving_info=err_msg,
+            algorithm=err_msg,
+            tutorial=err_msg,
+            plan=err_msg,
+            pseudocode=err_msg,
+            source_code=err_msg,
+        )
 
 @weave.op
 async def zero_shot_solver(
@@ -367,6 +430,8 @@ async def rag_solver(
         '''
         Create example solutions to the problem based on a draft solution.
         '''
+        assert type(problem) == Problem, "Problem must be a Problem object"
+        assert type(solution) == Solution, "Solution must be a Solution object"
         logger.info(f"Generating examplars:")
         retrieve_docs = retriever.retrieve(solution.source_code, top_k)
         reranked_docs = await rerank_docs(problem, solution, retrieve_docs, top_n)
