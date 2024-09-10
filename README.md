@@ -9,7 +9,7 @@
 [Weights & Biases](https://wandb.ai/site?utm_source=github&utm_medium=code&utm_campaign=lightning-ai-hacker-cup) are running a 7-day Lightning Competition focussed on solving practice problems for the  [2024 NeurIPS AI Hacker Cup](https://hackercupai.github.io/) challenge. The competition involves solving very challenging logic problems using code.
 
 #### Goal
-The goal is to try and solve all 5 of the 2023 practice questions for the AI Hacker Cup using MistralAI's models. We’re offering free MistralAI api access via the code in this colab to get people started. For context, the notebook included in this repo can consistently get 2 out of 5 solutions correct using Mistral Large.
+The goal is to try and solve all 5 of the 2023 practice questions for the AI Hacker Cup using MistralAI's models. We’re offering free MistralAI api access via the code in this colab to get people started. For context, the **[starter notebook](https://github.com/wandb/aihackercup/blob/main/rag_code_agent.ipynb)** included in this repo has free MistralAI api access and can consistently get 2 out of 5 solutions correct using `mistral-large-latest`.
 
 ### Deadline
 
@@ -24,7 +24,17 @@ Weights & Biases are giving away a pair of Meta Ray-Ban Smart Glasses for the fi
 
 (i.e. in total 3 pairs of sunglasses to give away)
 
-### Submissions
+## Getting Started
+
+**Starter Notebook**
+
+We have included a **[starter notebook](https://github.com/wandb/aihackercup/blob/main/rag_code_agent.ipynb)** which includes free MistralAI api access and which can consistently solve 2 out of 5 problems. This **[AI Hacker Cup lecture video](https://www.youtube.com/watch?v=cObBj2UpWK8)** includes an explanation of the approach taken, see the Resources section
+
+**Discord**
+
+The official 2024 NeurIPS Hacker Cup AI [discord is here](https://discord.gg/NkDxUd43Wf) and has a channel called `#lighting-comp-practice-problems` for discussion about this particular 7-day competition.
+
+## Submissions
 
 To submit code for verification you neeed to submit the following to the **[Submissions Form](https://forms.gle/5t3SgaxR11FhGAGX6)**:
 
@@ -33,7 +43,7 @@ To submit code for verification you neeed to submit the following to the **[Subm
 
 You can use your own code to generate solutions or you can modify the code in this repo. The one requirement is that evaluations must be run using W&B Weave as we'll be using those logs to help verify winning solutions.
 
-### Rules
+## Rules
 
 *Note these are the rules for the W&B Lightning Competition, not the official NeurIPS AI Hacker Cup challenge*
 
