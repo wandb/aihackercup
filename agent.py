@@ -440,7 +440,8 @@ async def rag_solver(
         timeout=timeout,
     )
     solution = zero_shot_result["solution"]
-    assert isinstance(solution, Solution), "Solution must be a Solution object"
+    assert isinstance(solution, Solution), "solution must be a Solution object"
+    assert solution.source_code, "solution does not contain source_code"
 
     test_report = zero_shot_result["test_report"]
     if test_report == "passed":
