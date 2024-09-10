@@ -92,10 +92,10 @@ You can learn more about the approach in this youtube video:
 
 ## Contents
 
-1. `demo.ipynb`: this notebook contains a full walkthrough of the RAG agent and how to use it to solve Hacker Cup
+1. `rag_code_agent.ipynb`: this notebook contains a full walkthrough of the RAG agent and how to use it to solve Hacker Cup
    problems.
 2. `retriever.py`: this script contains the implementation of the retriever we used.
-3. `agent.py`: this script contains the implementation of three different agents we used to solve the problems.
+3. `agent.py`: this script contains the implementation of the agent we used to solve the problems.
 4. `utils.py`: utility functions used in retrieving and generating solutions.
 5. `requirements.txt`: list of required packages to run the code.
 
