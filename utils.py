@@ -17,12 +17,17 @@ from pydantic import BaseModel, Field
 from tree_sitter_languages import get_language, get_parser
 
 
+# API params
 BASE_URL = os.getenv("BASE_URL", None)
+API_KEY = os.getenv("API_KEY", "dummy_key")
+
+# params
 MAX_TOKENS = os.getenv("MAX_TOKENS", 4096)
 FAST_LLM = os.getenv("FAST_LLM", "open-mistral-nemo-2407")
 STRONG_LLM = os.getenv("STRONG_LLM", "mistral-large-latest")
 
-oai_client = openai.AsyncOpenAI(base_url=BASE_URL, api_key="dummy_key")
+# API client
+oai_client = openai.AsyncOpenAI(base_url=BASE_URL, api_key=API_KEY)
 async_client = instructor.from_openai(oai_client, mode=instructor.Mode.JSON)
 
 language = get_language("python")
