@@ -461,6 +461,8 @@ async def rag_solver(
         assert isinstance(problem, Problem), "Problem must be a Problem object"
         assert isinstance(solution, Solution), "Solution must be a Solution object"
         logger.info(f"Generating examplars:")
+        assert solution.source_code is not None, "Solution does not contain source_code"
+        assert solution.source_code != "", "Solution does not contain source_code"
         retrieve_docs = retriever.retrieve(solution.source_code, top_k)
         reranked_docs = await rerank_docs(problem, solution, retrieve_docs, top_n)
         analyses = await analyze_and_plan_solutions(reranked_docs, temperature)
