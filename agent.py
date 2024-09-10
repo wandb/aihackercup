@@ -93,7 +93,9 @@ Let's think step by step to solve the problem:
     )
     try:
         formatted_response = await format_response(
-            response.choices[0].message.content, Solution
+            text=response.choices[0].message.content,
+            model=Solution, 
+            temperature=temperature
         )
         assert isinstance(formatted_response, Solution), "Response must be a Solution object"
         return formatted_response
@@ -148,7 +150,7 @@ Finally, generate the pseudocode to solve the problem.
 
 
 @weave.op
-async def analyze_and_plan(example: dict) -> Analysis:
+async def analyze_and_plan(example: dict, temperature: float = 0.7) -> Analysis:
     user_prompt = f"""{format_example(example)}
 
 Let's think step by step to analyze the problem and plan a solution to the problem:
@@ -159,6 +161,7 @@ Let's think step by step to analyze the problem and plan a solution to the probl
             {"role": "system", "content": ANALYSIS_INSTRUCTIONS},
             {"role": "user", "content": user_prompt},
         ],
+        temperature=temperature,
         response_model=None,
         max_tokens=MAX_TOKENS,
         max_retries=2
@@ -166,7 +169,9 @@ Let's think step by step to analyze the problem and plan a solution to the probl
 
     try:
         formatted_response = await format_response(
-            response.choices[0].message.content, Analysis
+            text=response.choices[0].message.content,
+            model=Analysis,
+            temperature=temperature
         )
         return formatted_response
     except Exception as e:
@@ -184,13 +189,13 @@ Let's think step by step to analyze the problem and plan a solution to the probl
 
 
 @weave.op
-async def analyze_and_plan_solutions(docs: List[dict]) -> List[Analysis]:
+async def analyze_and_plan_solutions(docs: List[dict], temperature: float = 0.7) -> List[Analysis]:
     '''
     Create analysis for a list of solutions.
     '''
     tasks = []
     for doc in docs:
-        tasks.append(analyze_and_plan(doc))
+        tasks.append(analyze_and_plan(doc, temperature))
     descriptions = await asyncio.gather(*tasks)
     return descriptions
 
@@ -228,7 +233,9 @@ Let's think step by step to solve the problem:
     )
     try:
         formatted_response = await format_response(
-            response.choices[0].message.content, Solution
+            text=response.choices[0].message.content,
+            model=Solution,
+            temperature=temperature
         )
         return formatted_response
     except Exception as e:
@@ -314,7 +321,9 @@ async def reflection(
     )
     try:
         formatted_response = await format_response(
-            response.choices[0].message.content, Reflection
+            text=response.choices[0].message.content,
+            model=Reflection,
+            temperature=temperature
         ) 
         return formatted_response  
     except Exception as e:
@@ -380,7 +389,9 @@ Let's think step by step to solve the problem correctly:
     )
     try:
         formatted_response = await format_response(
-            response.choices[0].message.content, Solution
+            text=response.choices[0].message.content,
+            model=Solution,
+            temperature=temperature
         )
         return formatted_response
     except Exception as e:
@@ -438,7 +449,11 @@ async def rag_solver(
 
     @weave.op
     async def generate_sample_solutions_from_code_dataset(
-        problem: Problem, solution: Solution, top_k: int = 50, top_n: int = 5
+        problem: Problem,
+        solution: Solution,
+        top_k: int = 50,
+        top_n: int = 5,
+        temperature: float = 0.7
     ):
         '''
         Create example solutions to the problem based on a draft solution.
@@ -448,7 +463,7 @@ async def rag_solver(
         logger.info(f"Generating examplars:")
         retrieve_docs = retriever.retrieve(solution.source_code, top_k)
         reranked_docs = await rerank_docs(problem, solution, retrieve_docs, top_n)
-        analyses = await analyze_and_plan_solutions(reranked_docs)
+        analyses = await analyze_and_plan_solutions(reranked_docs, temperature)
         examplars = format_examples(reranked_docs, analyses)
         return examplars
 
@@ -461,7 +476,11 @@ async def rag_solver(
         timeout: int = timeout,
     ) -> dict:
         logger.info(f"Generating RAG solution:")
-        examplars = await generate_sample_solutions_from_code_dataset(problem, draft_solution)
+        examplars = await generate_sample_solutions_from_code_dataset(
+            problem=problem, 
+            solution=draft_solution,
+            temperature=temperature
+        )
         rag_solution = await generate_solution(
             problem=problem,
             examples=examplars,
