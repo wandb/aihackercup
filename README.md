@@ -6,7 +6,7 @@
 # ⚡️ Competition - AI Hacker Cup
 
 
-[Weights & Biases](https://wandb.ai/site?utm_source=github&utm_medium=code&utm_campaign=lightning-ai-hacker-cup) are running a 7-day Lightning Competition focussed on solving practice problems for the  [2024 NeurIPS AI Hacker Cup](https://hackercupai.github.io/) challenge. The competition involves solving very challenging logic problems using code.
+[Weights & Biases](https://wandb.ai/site?utm_source=github&utm_medium=code&utm_campaign=lightning-ai-hacker-cup) are running a 7-day Lightning Competition focussed on using LLMs to solve the 2023 practice problems for the [2024 NeurIPS AI Hacker Cup](https://hackercupai.github.io/) challenge. The competition involves solving very challenging logic problems using code.
 
 #### Goal
 The goal is to try and solve all 5 of the 2023 practice questions for the AI Hacker Cup using MistralAI's models. We’re offering free MistralAI api access via the code in this colab to get people started. For context, the **[starter notebook](https://github.com/wandb/aihackercup/blob/main/rag_code_agent.ipynb)** included in this repo has free MistralAI api access and can consistently get 2 out of 5 solutions correct using `mistral-large-latest`.
