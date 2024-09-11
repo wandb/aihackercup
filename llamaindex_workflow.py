@@ -83,6 +83,7 @@ Output:
 """
 class SetupEvent(Event):
     problem: Problem
+    test_report: str = None
 
 class SolvedProblemEvent(Event):
     problem: Problem
@@ -116,6 +117,8 @@ class OneShotSolverWorkflow(Workflow):
     @weave.op
     async def generate_code(self, ctx: Context, ev: SetupEvent) -> SolvedProblemEvent:
         messages = await ctx.get("messages")
+        if ev.test_report:
+            messages.append({"role": "user", "content": f"Let's try again. The previous solution was incorrect:\n {ev.test_report}"})
         logging.info("Calling model to solve the problem")
         model_output = await async_client.chat.completions.create(
             model=STRONG_LLM,
@@ -137,7 +140,7 @@ class OneShotSolverWorkflow(Workflow):
 
     @step
     @weave.op
-    async def check_solution(self, ctx: Context, ev: FormattedSolutionEvent) -> StopEvent:
+    async def check_solution(self, ev: FormattedSolutionEvent) -> StopEvent:
         logging.info("Checking if the code is correct")
         test_report = check_correctness(
             ev.formatted_solution.source_code,
@@ -149,10 +152,7 @@ class OneShotSolverWorkflow(Workflow):
         if (test_report != "passed") and self.retries > 0:
             logging.info(f"Retrying the solution. Retries left: {self.retries}")
             self.retries -= 1
-            messages = await ctx.get("messages")
-            messages.append({"role": "user", "content": f"Let's try again. The previous solution was incorrect:\n {test_report}"})
-            await ctx.set("messages", messages)
-            return SetupEvent(problem=ev.problem)
+            return SetupEvent(problem=ev.problem, test_report=test_report)
         else:
             return StopEvent(result={"solution": ev.formatted_solution, "test_report": test_report})
 
