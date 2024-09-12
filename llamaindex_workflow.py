@@ -30,7 +30,8 @@ os.environ["WEAVE_PARALLELISM"] = "2"
 
 weave.init("llamaindex-workflow")
 
-from utils import Problem, async_client, STRONG_LLM, format_response, check_correctness
+from utils import Problem, async_client, STRONG_LLM, format_response
+from executor import check_correctness
 
 logging.basicConfig(
     format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
@@ -91,7 +92,7 @@ class SolvedProblemEvent(Event):
 
 class FormattedSolutionEvent(Event):
     problem: Problem
-    formatted_solution: Solution
+    solution: Solution
 
 class OneShotSolverWorkflow(Workflow):
     retries: int = 2
@@ -136,25 +137,25 @@ class OneShotSolverWorkflow(Workflow):
     async def format_solution(self, ev: SolvedProblemEvent) -> FormattedSolutionEvent:
         logging.info("Formatting the response")
         solution = await format_response(ev.problem_solution, Solution)
-        return FormattedSolutionEvent(problem=ev.problem, formatted_solution=solution)
+        return FormattedSolutionEvent(problem=ev.problem, solution=solution)
 
     @step
     @weave.op
     async def check_solution(self, ev: FormattedSolutionEvent) -> StopEvent:
         logging.info("Checking if the code is correct")
-        test_report = check_correctness(
-            ev.formatted_solution.source_code,
+        test_report = await check_correctness(
+            ev.solution.source_code,
             ev.problem.sample_input,
             ev.problem.sample_output,
             timeout=self.code_execution_timeout,
         )
         logging.info(f"Test report: {test_report}")
-        if (test_report != "passed") and self.retries > 0:
+        if (test_report.status != "passed") and self.retries > 0:
             logging.info(f"Retrying the solution. Retries left: {self.retries}")
             self.retries -= 1
-            return SetupEvent(problem=ev.problem, test_report=test_report)
+            return SetupEvent(problem=ev.problem, test_report=test_report.message)
         else:
-            return StopEvent(result={"solution": ev.formatted_solution, "test_report": test_report})
+            return StopEvent(result={"solution": ev.solution, "test_report": test_report})
 
 
 class OneShotSolver(weave.Model):
@@ -183,6 +184,7 @@ model = OneShotSolver()
 
 evals_dataset = [{"problem": problem.model_dump(), "expected_result": "passed"} for problem in problems]
 
+# #run one example
 # result = asyncio.run(model.predict(evals_dataset[0]["problem"]))
 # print(result)
 
