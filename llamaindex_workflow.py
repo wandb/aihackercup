@@ -30,8 +30,7 @@ os.environ["WEAVE_PARALLELISM"] = "2"
 
 weave.init("llamaindex-workflow")
 
-from utils import Problem, async_client, STRONG_LLM, format_response
-from executor import check_correctness
+from utils import Problem, async_client, STRONG_LLM, format_response, check_correctness
 
 logging.basicConfig(
     format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
