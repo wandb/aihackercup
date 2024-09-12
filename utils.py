@@ -1,3 +1,4 @@
+import asyncio
 import multiprocessing
 import os
 import pathlib
@@ -86,81 +87,61 @@ def clean_code_string(code: str) -> str:
     code = remove_extra_newlines(code)
     return code
 
+class TestReport(BaseModel):
+    status: str
+    message: str
 
-# ref: https://langchain-ai.github.io/langgraph/tutorials/usaco/usaco/#data
-multiprocessing.set_start_method("fork", force=True)
-# WARNING
-# This program exists to execute untrusted model-generated code. Although
-# it is highly unlikely that model-generated code will do something overtly
-# malicious in response to this test suite, model-generated code may act
-# destructively due to a lack of model capability or alignment.
-# Users are strongly encouraged to sandbox this evaluation suite so that it
-# does not perform destructive actions on their host or network.
-# Proceed at your own risk:
+    @property
+    def as_xml(self) -> str:
+        return f"""
+<test_report>
+<status>{self.status}</status>
+<message>{self.message}</message>
+</test_report>
+"""
 
-
-def exec_program(q, program, input_data, expected_output, timeout):
+async def exec_program(program, input_data, expected_output, timeout):
     try:
-        start_time = time.time()
-        process = subprocess.Popen(
-            [sys.executable, "-c", program],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
+        process = await asyncio.create_subprocess_exec(
+            sys.executable, "-c", program,
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
         )
-        stdout, stderr = process.communicate(input=input_data, timeout=timeout)
-        if time.time() - start_time > timeout:
-            raise TimeoutError("Execution timed out.")
+        
+        try:
+            stdout, stderr = await asyncio.wait_for(process.communicate(input=input_data.encode()), timeout=timeout)
+        except asyncio.TimeoutError:
+            process.kill()
+            return TestReport(
+                status="timeout",
+                message=f"Took too long! Your program timed out after {timeout} seconds of execution."
+            )
+        
         if process.returncode != 0:
-            q.put(f"failed: {stderr}")
+            return TestReport(
+                status="error", message=f"Program execution failed: {stderr.decode()}"
+            )
         else:
-            if stdout.strip() == expected_output.strip():
-                q.put("passed")
-            else:
-                q.put(
-                    f"WRONG ANSWER!!\n\n<expected>\n'{expected_output}'\n</expected>\n---\n<got>\n'{stdout}'\n</got>"
+            if stdout.decode().strip() == expected_output.strip():
+                return TestReport(
+                    status="passed", message="Yay! Your program ran successfully"
                 )
-    except subprocess.TimeoutExpired:
-        process.kill()
-        q.put("timed out")
+            else:
+                return TestReport(
+                    status="failed",
+                    message=f"<expected>\n{expected_output}</expected>\n---\n<got>\n{stdout.decode()}</got>",
+                )
     except Exception:
-        q.put(f"failed: {traceback.format_exc()}")
-
-
-import ast
-
-# @weave.op
-# def process_code_string(code_in_str):
-#     try:
-#         # Safely parse the string using literal_eval
-#         processed_code = ast.literal_eval(f'"""{code_in_str}"""')
-#         return processed_code
-#     except ValueError as e:
-#         print(f"Error processing string: {e}")
-#         return None
+        return TestReport(
+            status="error", message=f"An error occurred: {traceback.format_exc()}"
+        )
 
 @weave.op
-def check_correctness(
+async def check_correctness(
     program: str, input_data: str, expected_output: str, timeout: float
-) -> str:
-    # program = process_code_string(program)
-    q = multiprocessing.Queue()
-    process = multiprocessing.Process(
-        target=exec_program, args=(q, program, input_data, expected_output, timeout)
-    )
-    process.start()
-    process.join(timeout=timeout + 1)
-    if process.is_alive():
-        process.terminate()
-        process.join()
-        result = "timed out"
-    else:
-        try:
-            result = q.get_nowait()
-        except queue.Empty:
-            result = "no result returned"
-    return result
+) -> TestReport:
+    return await exec_program(program, input_data, expected_output, timeout)
 
 
 @weave.op

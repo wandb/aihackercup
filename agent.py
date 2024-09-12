@@ -418,11 +418,11 @@ async def zero_shot_solver(
         model=model,
         temperature=temperature,
     )
-    test_report = check_correctness(
+    test_report = await check_correctness(
         solution.source_code, problem.sample_input, problem.sample_output, timeout
     )
     logger.info(f"Draft solution result: {repr(test_report)}")
-    return {"solution": solution, "test_report": test_report, "stage": "zero-shot"}
+    return {"solution": solution, "stage": "zero-shot", "test_report": test_report}
 
 
 @weave.op
@@ -489,7 +489,7 @@ async def rag_solver(
             model=model,
             temperature=temperature,
         )
-        test_report = check_correctness(
+        test_report = await check_correctness(
             rag_solution.source_code,
             problem.sample_input,
             problem.sample_output,
@@ -529,7 +529,7 @@ async def rework_solution(
         model=model,
         temperature=temperature,
     )
-    test_report = check_correctness(
+    test_report = await check_correctness(
         improved_solution.source_code,
         problem.sample_input,
         problem.sample_output,
@@ -538,48 +538,47 @@ async def rework_solution(
     logger.info(f"Reworked solution result: {repr(test_report)}")
     return {"solution": improved_solution, "test_report": test_report}
 
-
 @weave.op
 async def rag_solver_with_reflection(
-    retriever: Retriever,
-    problem: Problem,
-    model: str = FAST_LLM,
-    temperature: float = 0.7,
-    max_iterations: int = 2,
-    timeout: int = 10,
+        retriever: Retriever,
+        problem: Problem,
+        model: str = FAST_LLM,
+        temperature: float = 0.7,
+        max_iterations: int = 2,
+        code_execution_timeout: int = 10,
 ):
     num_iterations = 0
-    test_report = "failed"
-    solution = None
-    assert isinstance(problem, Problem), "problem must be a Problem object"
-    while not test_report == "passed" and num_iterations < max_iterations:
+    while num_iterations < max_iterations:
         rag_result = await rag_solver(
             retriever=retriever,
             problem=problem,
-            timeout=timeout,
+            timeout=code_execution_timeout,
             model=model,
             temperature=temperature,
         )
-        solution = rag_result["solution"]
-        test_report = rag_result["test_report"]
-        if test_report == "passed":
+        solution, test_report = rag_result["solution"], rag_result["test_report"]
+        if test_report.status == "passed":
+            logger.info(f"Passing solution generated successfully for problem: {problem.problem_name}")
             return rag_result
+        
+        logger.info(f"Solution failed, reworking solution. Problem: {problem.problem_name}")
         rework_result = await rework_solution(
             problem=problem,
             incorrect_solution=solution,
             test_report=test_report,
             model=model,
             temperature=temperature,
-            timeout=timeout,
+            timeout=code_execution_timeout,
         )
-        solution = rework_result["solution"]
-        test_report = rework_result["test_report"]
-        if test_report == "passed":
+        solution, test_report = rework_result["solution"], rework_result["test_report"]
+        if test_report.status == "passed":
+            logger.info(f"Re-worked solution passed for problem: {problem.problem_name}")
             return {
                 "solution": solution,
                 "stage": "reflection",
                 "test_report": test_report,
             }
         num_iterations += 1
-    logger.info("Failed to generate a solution")
+        logger.info(f"Re-worked solution failed, trying iteration {num_iterations}. Problem: {problem.problem_name}")
+    logger.info("Failed to generate a solution after {num_iterations} iterations. Problem: {problem.problem_name}")
     return {"solution": solution, "stage": "failed", "test_report": test_report}
