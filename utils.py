@@ -23,7 +23,7 @@ BASE_URL = os.getenv("BASE_URL", None)
 API_KEY = os.getenv("API_KEY", "dummy_key")
 
 # params
-MAX_TOKENS = os.getenv("MAX_TOKENS", 4096)
+MAX_TOKENS = int(os.getenv("MAX_TOKENS", 4096))
 FAST_LLM = os.getenv("FAST_LLM", "open-mistral-nemo-2407")
 STRONG_LLM = os.getenv("STRONG_LLM", "mistral-large-latest")
 
