@@ -208,22 +208,22 @@ async def run_and_save_output(code: str, input: str, suffix: str, timeout: float
 
 @dataclass
 class Args(simple_parsing.Serializable):
-    code: str = "dataset/2023/practice/cheeseburger_corollary_ch1.cpp"
-    input: str = "dataset/2023/practice/cheeseburger_corollary_ch1.in"
-    output: str = "dataset/2023/practice/cheeseburger_corollary_ch1.out"
-    eval_name: str = "super_dupper_model"
-    weave_project: str = "hackercup-eval-solution"
-    timeout: float = 30
-    suffix: str = "_generated_output.txt"
-    debug: bool = False
-    folder: str = None
-    run_samples: bool = False
-    cpp_version: int = 11
+    code: str = "dataset/2023/practice/cheeseburger_corollary_ch1.cpp" # The file to run
+    input: str = "dataset/2023/practice/cheeseburger_corollary_ch1.in" # The input to run the program on
+    output: str = "dataset/2023/practice/cheeseburger_corollary_ch1.out" # The output to compare against
+    eval_name: str = "super_dupper_model" # The name of the evaluation
+    weave_project: str = "hackercup-eval-solution" # The name of the weave project
+    timeout: float = 30 # The timeout for the program execution (per problem)
+    suffix: str = "_generated_output.txt" # The suffix for the generated output file
+    verbose: bool = False # Whether to print verbose output
+    folder: str = None # Run all problems in this folder
+    run_samples: bool = False # Whether to run on the sample input/output pairs
+    cpp_version: int = 11 # The C++ version to use for the program execution
 
 
 if __name__ == "__main__":
     args = simple_parsing.parse(Args)
-    setup_logger(args.debug)
+    setup_logger(args.verbose)
 
     weave.init(args.weave_project)
 
@@ -262,5 +262,5 @@ if __name__ == "__main__":
         ]
 
         model = Runner(timeout=args.timeout, suffix=args.suffix, cpp_version=args.cpp_version)
-        evaluation = weave.Evaluation(dataset=dataset, scorers=[check_solution])
+        evaluation = weave.Evaluation(name=args.eval_name, dataset=dataset, scorers=[check_solution])
         asyncio.run(evaluation.evaluate(model))
