@@ -108,7 +108,8 @@ async def run_python(
 
 
 async def run_cpp(
-    cpp_file: Path, input_file: Path, output_file: Path, timeout: float = 10
+    cpp_file: Path, input_file: Path, output_file: Path, timeout: float = 10,
+    cpp_version: int = 11,
 ):
     """
     Run a C++ program with the given input file and output file.
@@ -117,7 +118,7 @@ async def run_cpp(
     base_name = os.path.splitext(cpp_file.name)[0]
 
     # Compile the C++ program
-    compile_command = f"g++ {cpp_file} -std=c++11 -o {base_name}"
+    compile_command = f"g++ {cpp_file} -std=c++{cpp_version} -o {base_name}"
     process = await asyncio.create_subprocess_shell(
         compile_command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
@@ -160,11 +161,11 @@ async def run_cpp(
 
 
 @weave.op
-async def run_program(code: Path, input: Path, output: Path, timeout: float = 10):
+async def run_program(code: Path, input: Path, output: Path, timeout: float = 10, cpp_version: int = 11):
     try:
         if code.suffix == ".cpp":
             logging.info(f"Running C++ program: {code}")
-            await run_cpp(code, input, output, timeout)
+            await run_cpp(code, input, output, timeout, cpp_version)
         elif code.suffix == ".py":
             logging.info(f"Running Python program: {code}")
             await run_python(code, input, output, timeout)
@@ -187,6 +188,24 @@ def check_solution(model_output: dict, output: str):
     }
 
 
+@weave.op
+async def run_and_save_output(code: str, input: str, suffix: str, timeout: float, cpp_version: int = 11) -> dict:
+    """
+    Run the program and save the output to a file.
+    """
+    code, input = Path(code), Path(input)
+    generated_output = input.parent / (input.stem + suffix)
+    try:
+        await run_program(code, input, generated_output, timeout=timeout, cpp_version=cpp_version)
+    except Exception as e:
+        generated_output.write_text(str(e))
+        return {
+            "generated_output": generated_output,
+            "runnable": False,
+            "error": str(e),
+        }
+    return {"generated_output": generated_output, "runnable": True, "error": None}
+
 @dataclass
 class Args(simple_parsing.Serializable):
     code: str = "dataset/2023/practice/cheeseburger_corollary_ch1.cpp"
@@ -194,11 +213,12 @@ class Args(simple_parsing.Serializable):
     output: str = "dataset/2023/practice/cheeseburger_corollary_ch1.out"
     eval_name: str = "super_dupper_model"
     weave_project: str = "hackercup-eval-solution"
-    timeout: float = 10
+    timeout: float = 30
     suffix: str = "_generated_output.txt"
     debug: bool = False
     folder: str = None
     run_samples: bool = False
+    cpp_version: int = 11
 
 
 if __name__ == "__main__":
@@ -208,29 +228,15 @@ if __name__ == "__main__":
     weave.init(args.weave_project)
 
     # run one file
-    @weave.op
-    async def run_and_save(code: str, input: str, suffix: str, timeout: float):
-        code, input = Path(code), Path(input)
-        generated_output = input.parent / (input.stem + suffix)
-        try:
-            await run_program(code, input, generated_output, timeout=timeout)
-        except Exception as e:
-            generated_output.write_text(str(e))
-            return {
-                "generated_output": generated_output,
-                "runnable": False,
-                "error": str(e),
-            }
-        return {"generated_output": generated_output, "runnable": True, "error": None}
-
     if not args.folder:
         logging.info(f"Running file: {args.code}")
         out = asyncio.run(
-            run_and_save(args.code, args.input, args.suffix, args.timeout)
+            run_and_save_output(args.code, args.input, args.suffix, args.timeout, args.cpp_version)
         )
 
         passed = check_solution(out, args.output)
         logging.info(f"Program passed: {passed}")
+    
     else:
         logging.info(f"Running folder: {args.folder}")
         logging.info("=" * 60)
@@ -239,10 +245,11 @@ if __name__ == "__main__":
         class Runner(weave.Model):
             timeout: float = 10
             suffix: str = "_generated_output.txt"
+            cpp_version: int = 11
 
             @weave.op
             async def predict(self, code: str, input: str):
-                return await run_and_save(code, input, self.suffix, self.timeout)
+                return await run_and_save_output(code, input, self.suffix, self.timeout, self.cpp_version)
 
         dataset = [
             {
@@ -254,6 +261,6 @@ if __name__ == "__main__":
             for problem in problems
         ]
 
-        model = Runner(timeout=args.timeout)
+        model = Runner(timeout=args.timeout, suffix=args.suffix, cpp_version=args.cpp_version)
         evaluation = weave.Evaluation(dataset=dataset, scorers=[check_solution])
         asyncio.run(evaluation.evaluate(model))
