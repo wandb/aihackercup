@@ -10,6 +10,7 @@ import simple_parsing
 from pydantic import BaseModel, Field
 from rich.logging import RichHandler
 
+
 def setup_logger(debug=False):
     level = "DEBUG" if debug else "INFO"
     logging.basicConfig(
@@ -18,16 +19,19 @@ def setup_logger(debug=False):
 
 
 class Problem(BaseModel):
-    problem_dir: Path = Field(
-        ..., description="The path to the problem directory"
-    )
+    problem_dir: Path = Field(..., description="The path to the problem directory")
     problem_name: str = Field(..., description="The name of the problem")
     problem_description: str = Field(..., description="The description of the problem")
-    sample_input: str = Field(..., description="The path to the sample input of the problem")
-    sample_output: str = Field(..., description="The path to the sample output of the problem")
+    sample_input: str = Field(
+        ..., description="The path to the sample input of the problem"
+    )
+    sample_output: str = Field(
+        ..., description="The path to the sample output of the problem"
+    )
     code: str = Field(..., description="The path to the code file")
     input: str = Field(..., description="The path to the input file")
     output: str = Field(..., description="The path to the output file")
+
 
 def guess_code_file(problem_name: str, problem_dir: Path) -> Path:
     if os.path.exists(problem_dir / f"{problem_name}.cpp"):
@@ -36,6 +40,7 @@ def guess_code_file(problem_name: str, problem_dir: Path) -> Path:
         return problem_dir / f"{problem_name}.py"
     else:
         raise ValueError(f"No code file found for problem {problem_name}")
+
 
 def load_problem(problem_name: str, problem_dir: Path) -> Problem:
     input = problem_dir / f"{problem_name}.in"
@@ -55,6 +60,7 @@ def load_problem(problem_name: str, problem_dir: Path) -> Problem:
         code=str(code),
     )
 
+
 def find_problems(folder: Path) -> list[dict]:
     """
     Find all the problems in the given folder.
@@ -72,77 +78,86 @@ def find_problems(folder: Path) -> list[dict]:
     return problems
 
 
-async def run_python(program: Path, input_file: Path, output_file: Path, timeout: float = 10):
+async def run_python(
+    program: Path, input_file: Path, output_file: Path, timeout: float = 10
+):
     """
     Run a Python program with the given input file and output file.
     """
     try:
         process = await asyncio.create_subprocess_exec(
-            sys.executable, program,
-            stdin=input_file.open('rb'),
-            stdout=output_file.open('wb'),
-            stderr=asyncio.subprocess.PIPE
+            sys.executable,
+            program,
+            stdin=input_file.open("rb"),
+            stdout=output_file.open("wb"),
+            stderr=asyncio.subprocess.PIPE,
         )
-        
+
         try:
             _, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
         except asyncio.TimeoutError:
             process.kill()
             raise TimeoutError(f"Program execution timed out after {timeout} seconds")
-        
+
         if process.returncode != 0:
             raise RuntimeError(f"Program execution failed: {stderr.decode()}")
-        
+
         logging.info(f"Output saved to {output_file}")
     except Exception as e:
         raise RuntimeError(f"Error running Python program: {str(e)}")
 
-async def run_cpp(cpp_file: Path, input_file: Path, output_file: Path, timeout: float = 10):
+
+async def run_cpp(
+    cpp_file: Path, input_file: Path, output_file: Path, timeout: float = 10
+):
     """
     Run a C++ program with the given input file and output file.
     """
     # Get the base name of the cpp file (without extension)
     base_name = os.path.splitext(cpp_file.name)[0]
-    
+
     # Compile the C++ program
     compile_command = f"g++ {cpp_file} -std=c++11 -o {base_name}"
     process = await asyncio.create_subprocess_shell(
-        compile_command,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        compile_command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
     stdout, stderr = await process.communicate()
-    
+
     if process.returncode != 0:
         raise RuntimeError(f"Compilation failed: {stderr.decode()}")
-    
+
     try:
         # Run the compiled program with input from file
-        with open(input_file, 'r') as infile:
+        with open(input_file, "r") as infile:
             process = await asyncio.create_subprocess_exec(
                 f"./{base_name}",
                 stdin=infile,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
-            
+
             try:
-                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
+                stdout, stderr = await asyncio.wait_for(
+                    process.communicate(), timeout=timeout
+                )
             except asyncio.TimeoutError:
                 process.kill()
-                raise TimeoutError(f"Program execution timed out after {timeout} seconds")
-            
+                raise TimeoutError(
+                    f"Program execution timed out after {timeout} seconds"
+                )
+
             if process.returncode != 0:
                 raise RuntimeError(f"Program execution failed: {stderr.decode()}")
-            
+
             output_file.write_text(stdout.decode())
-        
+
         logging.info(f"Output saved to {output_file}")
-    
+
     finally:
         # Clean up the compiled file
         if os.path.exists(base_name):
             os.remove(base_name)
+
 
 @weave.op
 async def run_program(code: Path, input: Path, output: Path, timeout: float = 10):
@@ -159,13 +174,18 @@ async def run_program(code: Path, input: Path, output: Path, timeout: float = 10
         raise e
     return
 
+
 @weave.op
 def check_solution(model_output: dict, output: str):
     "A simple check to see if the output is correct"
     # these may be big!
-    generated_output = Path(model_output["generated_output"]).read_text() 
+    generated_output = Path(model_output["generated_output"]).read_text()
     output = Path(output).read_text()
-    return {"solved": generated_output.strip() == output.strip(), "runnable": model_output["runnable"]}
+    return {
+        "solved": generated_output.strip() == output.strip(),
+        "runnable": model_output["runnable"],
+    }
+
 
 @dataclass
 class Args(simple_parsing.Serializable):
@@ -180,12 +200,12 @@ class Args(simple_parsing.Serializable):
     folder: str = None
     run_samples: bool = False
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     args = simple_parsing.parse(Args)
     setup_logger(args.debug)
 
     weave.init(args.weave_project)
-    
 
     # run one file
     @weave.op
@@ -196,24 +216,26 @@ if __name__=="__main__":
             await run_program(code, input, generated_output, timeout=timeout)
         except Exception as e:
             generated_output.write_text(str(e))
-            return {"generated_output": generated_output, "runnable": False, "error": str(e)}
+            return {
+                "generated_output": generated_output,
+                "runnable": False,
+                "error": str(e),
+            }
         return {"generated_output": generated_output, "runnable": True, "error": None}
 
     if not args.folder:
         logging.info(f"Running file: {args.code}")
-        out = asyncio.run(run_and_save(
-            args.code,
-            args.input,
-            args.suffix,
-            args.timeout
-        ))
+        out = asyncio.run(
+            run_and_save(args.code, args.input, args.suffix, args.timeout)
+        )
 
         passed = check_solution(out, args.output)
         logging.info(f"Program passed: {passed}")
     else:
         logging.info(f"Running folder: {args.folder}")
-        logging.info("="*60)
+        logging.info("=" * 60)
         problems = find_problems(Path(args.folder))
+
         class Runner(weave.Model):
             timeout: float = 10
             suffix: str = "_generated_output.txt"
@@ -222,11 +244,15 @@ if __name__=="__main__":
             async def predict(self, code: str, input: str):
                 return await run_and_save(code, input, self.suffix, self.timeout)
 
-        dataset = [{"input": problem.sample_input if args.run_samples else problem.input, 
-                    "output": problem.sample_output if args.run_samples else problem.output,
-                    "code": problem.code,
-                    "problem_name": problem.problem_name} for problem in problems]
-
+        dataset = [
+            {
+                "input": problem.sample_input if args.run_samples else problem.input,
+                "output": problem.sample_output if args.run_samples else problem.output,
+                "code": problem.code,
+                "problem_name": problem.problem_name,
+            }
+            for problem in problems
+        ]
 
         model = Runner(timeout=args.timeout)
         evaluation = weave.Evaluation(dataset=dataset, scorers=[check_solution])
