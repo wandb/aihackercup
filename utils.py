@@ -11,6 +11,7 @@ import logging
 import time
 import traceback
 from typing import Any, List
+import math
 
 import weave
 import openai
@@ -35,6 +36,15 @@ async_client = instructor.from_openai(oai_client, mode=instructor.Mode.JSON)
 
 language = get_language("python")
 tree_parser = get_parser("python")
+
+import re
+
+def maybe_remove_backticks(solution: str) -> str:
+    "Remove backticks from the solution"
+    solution = solution.strip()
+    solution = re.sub(r'^```python\s*', '', solution)
+    solution = re.sub(r'\s*```$', '', solution)
+    return solution
 
 
 def remove_extra_newlines(text: str) -> str:
@@ -102,6 +112,41 @@ class TestReport(BaseModel):
 </test_report>
 """
 
+def compare_lines_with_tolerance(expected: str, actual: str, tolerance: float = 1e-9) -> bool:
+    """
+    Compare two lines of output with a tolerance for floating point numbers.
+    """
+    expected_lines = expected.strip().split('\n')
+    actual_lines = actual.strip().split('\n')
+
+    if len(expected_lines) != len(actual_lines):
+        return False
+
+    for expected_line, actual_line in zip(expected_lines, actual_lines):
+        expected_match = re.match(r"Case #\d+: (.+)", expected_line)
+        actual_match = re.match(r"Case #\d+: (.+)", actual_line)
+
+        if not expected_match or not actual_match:
+            return False
+
+        expected_values = expected_match.group(1).split()
+        actual_values = actual_match.group(1).split()
+
+        if len(expected_values) != len(actual_values):
+            return False
+
+        for expected_value, actual_value in zip(expected_values, actual_values):
+            try:
+                expected_float = float(expected_value)
+                actual_float = float(actual_value)
+                if not math.isclose(expected_float, actual_float, rel_tol=tolerance):
+                    return False
+            except ValueError:
+                if expected_value != actual_value:
+                    return False
+
+    return True
+
 async def exec_program(program, input_data, expected_output, timeout):
     try:
         process = await asyncio.create_subprocess_exec(
@@ -125,7 +170,7 @@ async def exec_program(program, input_data, expected_output, timeout):
                 status="error", message=f"Program execution failed: {stderr.decode()}"
             )
         else:
-            if stdout.decode().strip() == expected_output.strip():
+            if compare_lines_with_tolerance(expected_output, stdout.decode()):
                 return TestReport(
                     status="passed", message="Yay! Your program ran successfully"
                 )
