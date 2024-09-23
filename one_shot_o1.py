@@ -96,8 +96,19 @@ async def o1_solver(
         problem.sample_output,
         timeout=timeout,
     )
+    logging.info("Checking if the code is correct for the full problem")
+    input_data = problem.problem_input.read_text()
+    expected_output = problem.problem_output.read_text()
+    test_report_full = await check_correctness(
+        solution.source_code,
+        input_data,
+        expected_output,
+        timeout=timeout,
+    )
 
-    return {"solution": solution, "test_report": test_report}
+    return {"solution": solution, 
+            "test_report": test_report,
+            "test_report_full": test_report_full}
 
 
 class O1ShotSolver(weave.Model):
@@ -121,7 +132,8 @@ evals_dataset = [{"problem": problem.model_dump(), "expected_result": "passed"} 
 def scorer(expected_result: str, model_output: dict) -> dict:
     if model_output is None or model_output["test_report"].status is None:
         return {"solution_passed": False}
-    return {"solution_passed": expected_result == model_output["test_report"].status}
+    return {"passed_sample": expected_result == model_output["test_report"].status,
+            "passed_full": expected_result == model_output["test_report_full"].status}
 
 logger.info("Creating evaluator")
 evaluator = weave.Evaluation(dataset=evals_dataset, scorers=[scorer], trials=1)
