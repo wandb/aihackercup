@@ -2,10 +2,12 @@ import asyncio
 import multiprocessing
 import os
 import pathlib
+from pathlib import Path
 import queue
 import re
 import subprocess
 import sys
+import logging
 import time
 import traceback
 from typing import Any, List
@@ -192,23 +194,58 @@ class Problem(BaseModel):
 </problem>
 """
 
+    @classmethod
+    def from_name(cls, problem_name: str, folder_path: Path):
+        description_path = folder_path / f"{problem_name}.md"
+        sample_input_path = folder_path / f"{problem_name}_sample_input.txt"
+        sample_output_path = folder_path / f"{problem_name}_sample_output.txt"
+        input_path = folder_path / f"{problem_name}.in"
+        output_path = folder_path / f"{problem_name}.out"
 
-def load_problem(problem_name: str, problem_dir: pathlib.Path) -> Problem:
-    problem_input = problem_dir / f"{problem_name}.in"
-    problem_output = problem_dir / f"{problem_name}.out"
-    sample_input = problem_dir / f"{problem_name}_sample_input.txt"
-    sample_output = problem_dir / f"{problem_name}_sample_output.txt"
-    problem_description = problem_dir / f"{problem_name}.md"
-    return Problem(
-        problem_dir=problem_dir,
-        problem_name=problem_name,
-        problem_description=problem_description.read_text(),
-        sample_input=sample_input.read_text(),
-        sample_output=sample_output.read_text(),
-        problem_input=problem_input,
-        problem_output=problem_output,
-    )
+        return cls.from_files(
+            problem_name=problem_name,
+            description_path=description_path,
+            sample_input_path=sample_input_path,
+            sample_output_path=sample_output_path,
+            input_path=input_path,
+            output_path=output_path,
+        )
 
+    @classmethod
+    def from_files(
+        cls, 
+        problem_name: str, 
+        description_path: Path, 
+        sample_input_path: Path, 
+        sample_output_path: Path, 
+        input_path: Path,
+        output_path: Path = None,
+    ):
+        return cls(
+            problem_name=problem_name,
+            problem_description=description_path.read_text(),
+            sample_input=sample_input_path.read_text(),
+            sample_output=sample_output_path.read_text(),
+            problem_input=input_path,
+            problem_output=output_path if output_path else input_path.with_suffix('.out'),
+            problem_dir=input_path.parent,
+        )
+    
+def find_problems(folder: Path) -> list[dict]:
+    """
+    Find all the problems in the given folder.
+    """
+    problems = []
+
+    # search for all files ending in .in
+    problem_names = [file.stem for file in folder.glob("**/*.in")]
+    for problem_name in problem_names:
+        try:
+            problems.append(Problem.from_name(problem_name, folder))
+        except Exception as e:
+            logging.error(f"Error loading problem {problem_name}: {e}")
+    logging.info(f"Found {len(problems)} problems")
+    return problems
 
 class Analysis(BaseModel):
     core_question: str = Field(..., description="Core question of the problem")
