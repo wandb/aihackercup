@@ -16,7 +16,7 @@ os.environ["WEAVE_PARALLELISM"] = "5"
 
 
 # Start of workout
-from utils import async_client, format_response, check_correctness, find_problems, Problem
+from utils import async_client, format_response, check_correctness, find_problems, Problem, maybe_remove_backticks
 
 logging.basicConfig(
     format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
@@ -33,9 +33,7 @@ class Solution(BaseModel):
 
 
 
-prompt_template = """
-You will be provided with a problem statement, and you need to create a Python3 solution for it. 
-Your task it to develop a winning solution to the problem in Python3 programming language.
+prompt_template = """You will be provided with a problem statement, and you need to create a Python3 solution for it. 
 Write the final solution in Python3 programming language to solve the problem.
 
 ## Competition Guidelines:
@@ -46,8 +44,7 @@ Write the final solution in Python3 programming language to solve the problem.
     d. Do not add extra print statements otherwise it will fail the test cases.
     e. Make sure your code passes all potential test cases, including edge cases
     f. Follow the input/output format specified in the problem statement and the sample test cases.
-
-Let's think step by step to solve the problem:
+    g. We will run the program by calling `python3 program.py` so make sure it outputs the correct results.
 
 {problem_description}
 
@@ -89,6 +86,7 @@ async def o1_solver(
     # extract code from the response
     logging.info("Formatting the response")
     solution = await format_response(out, Solution)
+    solution.source_code = maybe_remove_backticks(solution.source_code)
 
     # check if the code is correct
     logging.info("Checking if the code is correct")
@@ -116,7 +114,6 @@ class O1ShotSolver(weave.Model):
         )
     
 model = O1ShotSolver()
-
 
 evals_dataset = [{"problem": problem.model_dump(), "expected_result": "passed"} for problem in problems]
 
