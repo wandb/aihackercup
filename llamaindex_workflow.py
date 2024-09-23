@@ -189,9 +189,9 @@ evals_dataset = [{"problem": problem.model_dump(), "expected_result": "passed"} 
 
 @weave.op
 def scorer(expected_result: str, model_output: dict) -> dict:
-    if model_output is None or model_output["test_report"] is None:
+    if model_output is None or model_output["test_report"].status is None:
         return {"solution_passed": False}
-    return {"solution_passed": expected_result == model_output["test_report"]}
+    return {"solution_passed": expected_result == model_output["test_report"].status}
 
 logger.info("Creating evaluator")
 evaluator = weave.Evaluation(dataset=evals_dataset, scorers=[scorer], trials=1)
