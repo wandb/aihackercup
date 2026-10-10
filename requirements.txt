@@ -1,5 +1,5 @@
 bm25s==0.1.10
-datasets==2.21.0
+datasets==5.0.1
 joblib==1.4.2
 pandas==2.2.2
 pydantic==2.8.2
